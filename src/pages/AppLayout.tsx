@@ -1,6 +1,5 @@
 import { Outlet } from "react-router";
-import { lazy, Suspense } from "react";
-import Loading from "../components/Loading";
+import { lazy } from "react";
 
 const Navigation = lazy(() => import("../components/Navigation"));
 
@@ -9,9 +8,7 @@ export default function AppLayout() {
     <>
       <Navigation />
       <main>
-        {/* <Suspense fallback={<Loading />}> */}
         <Outlet />
-        {/* </Suspense> */}
       </main>
     </>
   );

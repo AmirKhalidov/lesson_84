@@ -21,9 +21,11 @@ export interface CastMember {
 export default function MovieCast() {
   const { movieId } = useParams();
   const [movieCast, setMovieCast] = useState<CastMember[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMovieCast = async () => {
+      setLoading(true);
       const url = `https://api.themoviedb.org/3/movie/${movieId}/credits`;
       const options = {
         headers: {
@@ -43,6 +45,8 @@ export default function MovieCast() {
         } else {
           console.log(error);
         }
+      } finally {
+        setLoading(false);
       }
     };
     fetchMovieCast();
@@ -68,11 +72,20 @@ export default function MovieCast() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Movie Cast</h1>
+        <div className={styles.loading}>Loading cast information...</div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Movie Cast</h1>
       <ul className={styles.castGrid}>
-        {movieCast && movieCast.length > 0 ? (
+        {movieCast.length > 0 ? (
           movieCast.map((castMember: CastMember) => (
             <li key={castMember.id} className={styles.castCard}>
               {castMember.profile_path ? (

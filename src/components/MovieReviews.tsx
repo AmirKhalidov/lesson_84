@@ -23,9 +23,11 @@ export interface MovieReview {
 export default function MovieReviews() {
   const { movieId } = useParams();
   const [movieReviews, setMovieReviews] = useState<MovieReview[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMovieReviews = async () => {
+      setLoading(true);
       const url = `https://api.themoviedb.org/3/movie/${movieId}/reviews`;
       const options = {
         headers: {
@@ -45,6 +47,8 @@ export default function MovieReviews() {
         } else {
           console.log(error);
         }
+      } finally {
+        setLoading(false);
       }
     };
     fetchMovieReviews();
@@ -65,6 +69,15 @@ export default function MovieReviews() {
       .join("")
       .toUpperCase();
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Movie Reviews</h1>
+        <div className={styles.loading}>Loading reviews...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

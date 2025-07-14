@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import styles from "../styles/HomePage.module.css";
+import { Link } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 
 export interface Movie {
   adult: boolean;
@@ -21,39 +23,68 @@ export interface Movie {
 
 export default function HomePage() {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchTrendingMovies = async () => {
-      const url =
-        "https://api.themoviedb.org/3/trending/movie/day?language=en-US";
-      const options = {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYTM5NzU3ZTdlMDRkMTlhNzM4ZGY3YTM0NzQxZjMyMiIsIm5iZiI6MTcxNjM3MTU0Ni40NzcsInN1YiI6IjY2NGRjMDVhODYwYzYzYzM3MDM1YWQzNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.xqnWrHQ71IVjWIudK5sVyPpRqFDdqG4s04GZ5PHX_gQ",
-        },
-      };
+    fetchTrendingMovies(currentPage);
+  }, [currentPage]);
 
-      try {
-        const { data } = await axios.get(url, options);
-        setMovies(data.results);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.log(error.message);
-        } else {
-          console.log(error);
-        }
-      }
+  const fetchTrendingMovies = async (page: number) => {
+    setLoading(true);
+    const url = `https://api.themoviedb.org/3/trending/movie/day?language=en-US&page=${page}`;
+    const options = {
+      headers: {
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYTM5NzU3ZTdlMDRkMTlhNzM4ZGY3YTM0NzQxZjMyMiIsIm5iZiI6MTcxNjM3MTU0Ni40NzcsInN1YiI6IjY2NGRjMDVhODYwYzYzYzM3MDM1YWQzNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.xqnWrHQ71IVjWIudK5sVyPpRqFDdqG4s04GZ5PHX_gQ",
+      },
     };
 
-    fetchTrendingMovies();
-  }, []);
+    try {
+      const { data } = await axios.get(url, options);
+      setMovies(data.results);
+      setTotalPages(data.total_pages);
+      setCurrentPage(page);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.log(error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (selectedItem: { selected: number }) => {
+    const newPage = selectedItem.selected + 1;
+    fetchTrendingMovies(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading movies...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Trending Movies</h1>
+      <div className={styles.pageInfo}>
+        Page {currentPage} of {totalPages}
+      </div>
+
       <ul className={styles.movieGrid}>
         {movies.map((movie: Movie) => (
-          <li key={movie.id} className={styles.movieCard}>
+          <Link
+            to={`/movies/${movie.id}`}
+            key={movie.id}
+            className={styles.movieCard}
+          >
             {movie.poster_path ? (
               <img
                 src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
@@ -77,9 +108,33 @@ export default function HomePage() {
                 <span>{movie.release_date}</span>
               </div>
             </div>
-          </li>
+          </Link>
         ))}
       </ul>
+
+      {totalPages > 1 && (
+        <ReactPaginate
+          pageCount={totalPages}
+          pageRangeDisplayed={5}
+          marginPagesDisplayed={2}
+          onPageChange={handlePageChange}
+          containerClassName={styles.pagination}
+          pageClassName={styles.pageItem}
+          pageLinkClassName={styles.pageLink}
+          activeClassName={styles.active}
+          previousClassName={styles.pageItem}
+          nextClassName={styles.pageItem}
+          previousLinkClassName={styles.pageLink}
+          nextLinkClassName={styles.pageLink}
+          disabledClassName={styles.disabled}
+          breakClassName={styles.pageItem}
+          breakLinkClassName={styles.pageLink}
+          previousLabel="← Previous"
+          nextLabel="Next →"
+          breakLabel="..."
+          forcePage={currentPage - 1}
+        />
+      )}
     </div>
   );
 }

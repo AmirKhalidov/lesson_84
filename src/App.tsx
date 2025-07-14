@@ -18,15 +18,10 @@ function App() {
       errorElement: <Error />,
 
       children: [
-        // { index: true, Component: HomePage },
-        // { path: "/movies", Component: MoviesPage },
-        // { path: "/movies/:movieId", Component: MovieDetailsPage },
-        // { path: "/movies/:movieId/cast", Component: MovieCast },
-        // { path: "/movies/:movieId/reviews", Component: MovieReviews },
         {
           index: true,
           element: (
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<Loading />} key={1}>
               <HomePage />
             </Suspense>
           ),
@@ -34,7 +29,7 @@ function App() {
         {
           path: "/movies",
           element: (
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<Loading />} key={2}>
               <MoviesPage />
             </Suspense>
           ),
@@ -42,7 +37,7 @@ function App() {
         {
           path: "/movies/:movieId",
           element: (
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<Loading />} key={3}>
               <MovieDetailsPage />
             </Suspense>
           ),
@@ -50,7 +45,7 @@ function App() {
         {
           path: "/movies/:movieId/cast",
           element: (
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<Loading />} key={4}>
               <MovieCast />
             </Suspense>
           ),
@@ -58,7 +53,7 @@ function App() {
         {
           path: "/movies/:movieId/reviews",
           element: (
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<Loading />} key={5}>
               <MovieReviews />
             </Suspense>
           ),
